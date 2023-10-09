@@ -5,6 +5,7 @@ from logger import get_logger, log_error
 from Regressor import Regressor
 from schema.data_schema import load_json_data_schema, save_schema
 from utils import read_csv_in_directory, set_seeds
+from preprocessing.pipeline import run_pipeline
 
 logger = get_logger(task_name="train")
 logging.basicConfig(level=logging.INFO)
@@ -41,6 +42,8 @@ def run_training(
 
         for column in data_schema.categorical_features:
             x_train[column] = x_train[column].astype(str)
+
+        x_train = run_pipeline(x_train, data_schema, training=True)
 
         logger.info("Preprocessing training data...")
 
