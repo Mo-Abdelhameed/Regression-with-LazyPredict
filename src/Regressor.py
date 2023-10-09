@@ -139,7 +139,7 @@ class Regressor:
     def train(self) -> None:
         """Train the model on the provided data"""
         self.models, _ = self.predictor.fit(self.x_train, self.x_test, self.y_train, self.y_test)
-        self.best_model = self.models.iloc[0].name
+        self.best_model = self.models["RMSE"].idxmin()
         self._is_trained = True
 
 
