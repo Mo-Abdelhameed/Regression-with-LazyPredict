@@ -1,6 +1,9 @@
 # get slim base image for python
 FROM python:3.9.17-slim-bullseye as builder
 
+
+RUN apt-get update && apt-get install -y libgomp1
+
 COPY ./requirements/requirements.txt /opt/
 RUN pip3 install --no-cache-dir -r /opt/requirements.txt
 COPY src /opt/src
