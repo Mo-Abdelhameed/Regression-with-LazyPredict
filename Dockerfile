@@ -1,5 +1,5 @@
 # get slim base image for python
-FROM mfeurer/auto-sklearn:master
+FROM python:3.9.17-slim-bullseye as builder
 
 COPY ./requirements/requirements.txt /opt/
 RUN pip3 install --no-cache-dir -r /opt/requirements.txt
