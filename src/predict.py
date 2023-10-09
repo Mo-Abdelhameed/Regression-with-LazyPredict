@@ -29,6 +29,10 @@ def run_batch_predictions(
     data_schema = load_saved_schema(saved_schema_dir)
     ids = x_test[data_schema.id]
     x_test = x_test.drop(columns=[data_schema.id])
+
+    for column in data_schema.categorical_features:
+            x_test[column] = x_test[column].astype(str)
+
     model = Regressor.load(predictor_dir)
     logger.info("Making predictions...")
     predictions_df = predict_with_model(model, x_test)
