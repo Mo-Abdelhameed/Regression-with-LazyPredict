@@ -1,0 +1,12 @@
+{
+  "seed_value": 123,
+  "prediction_field_name": "prediction",
+  "regressor": [
+      "RandomForestRegressor",
+      "LinearRegression",
+      "GradientBoostingRegressor",
+      "AdaBoostRegressor",
+      "MLPRegressor",
+      "RidgeCV"
+  ]
+}
