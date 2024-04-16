@@ -15,8 +15,12 @@ from sklearn.svm import SVR, LinearSVR, NuSVR
 
 # Ensemble methods
 from sklearn.ensemble import (
-    RandomForestRegressor, ExtraTreesRegressor, AdaBoostRegressor,
-    GradientBoostingRegressor, HistGradientBoostingRegressor, BaggingRegressor
+    RandomForestRegressor,
+    ExtraTreesRegressor,
+    AdaBoostRegressor,
+    GradientBoostingRegressor,
+    HistGradientBoostingRegressor,
+    BaggingRegressor,
 )
 
 # Nearest Neighbors
@@ -27,11 +31,25 @@ from sklearn.neural_network import MLPRegressor
 
 # Linear models
 from sklearn.linear_model import (
-    HuberRegressor, LinearRegression, RidgeCV, BayesianRidge, Ridge,
-    LassoCV, ElasticNetCV, LassoLarsCV, LassoLarsIC, LarsCV, Lars, 
-    SGDRegressor, RANSACRegressor, ElasticNet, Lasso, 
-    OrthogonalMatchingPursuitCV, OrthogonalMatchingPursuit,
-    PassiveAggressiveRegressor, LassoLars
+    HuberRegressor,
+    LinearRegression,
+    RidgeCV,
+    BayesianRidge,
+    Ridge,
+    LassoCV,
+    ElasticNetCV,
+    LassoLarsCV,
+    LassoLarsIC,
+    LarsCV,
+    Lars,
+    SGDRegressor,
+    RANSACRegressor,
+    ElasticNet,
+    Lasso,
+    OrthogonalMatchingPursuitCV,
+    OrthogonalMatchingPursuit,
+    PassiveAggressiveRegressor,
+    LassoLars,
 )
 
 # Tree models
@@ -48,20 +66,41 @@ from sklearn.gaussian_process import GaussianProcessRegressor
 
 
 regressors = [
-    SVR, LinearSVR, NuSVR,
-    RandomForestRegressor, ExtraTreesRegressor, AdaBoostRegressor,
-    GradientBoostingRegressor, HistGradientBoostingRegressor, BaggingRegressor,
+    SVR,
+    LinearSVR,
+    NuSVR,
+    RandomForestRegressor,
+    ExtraTreesRegressor,
+    AdaBoostRegressor,
+    GradientBoostingRegressor,
+    HistGradientBoostingRegressor,
+    BaggingRegressor,
     KNeighborsRegressor,
     MLPRegressor,
-    HuberRegressor, LinearRegression, RidgeCV, BayesianRidge, Ridge,
-    LassoCV, ElasticNetCV, LassoLarsCV, LassoLarsIC, LarsCV, Lars, 
-    SGDRegressor, RANSACRegressor, ElasticNet, Lasso, 
-    OrthogonalMatchingPursuitCV, OrthogonalMatchingPursuit,
-    PassiveAggressiveRegressor, LassoLars,
-    DecisionTreeRegressor, ExtraTreeRegressor,
+    HuberRegressor,
+    LinearRegression,
+    RidgeCV,
+    BayesianRidge,
+    Ridge,
+    LassoCV,
+    ElasticNetCV,
+    LassoLarsCV,
+    LassoLarsIC,
+    LarsCV,
+    Lars,
+    SGDRegressor,
+    RANSACRegressor,
+    ElasticNet,
+    Lasso,
+    OrthogonalMatchingPursuitCV,
+    OrthogonalMatchingPursuit,
+    PassiveAggressiveRegressor,
+    LassoLars,
+    DecisionTreeRegressor,
+    ExtraTreeRegressor,
     DummyRegressor,
     KernelRidge,
-    GaussianProcessRegressor
+    GaussianProcessRegressor,
 ]
 
 warnings.filterwarnings("ignore")
@@ -121,27 +160,32 @@ class Regressor:
         self.schema = schema
         self.x = train_input.drop(columns=[schema.target])
         self.y = train_input[schema.target]
-        self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(self.x, self.y, test_size=0.1)
+        self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(
+            self.x, self.y, test_size=0.1
+        )
         self.model_name = "lazy_predict_regressor"
         self.predictor = LazyRegressor(
             verbose=0,
-            ignore_warnings=True, 
-            custom_metric=None, 
-            regressors=[regressor for regressor in regressors if regressor.__name__ in self.model_config["regressor"]]
-            )
+            ignore_warnings=True,
+            custom_metric=None,
+            regressors=[
+                regressor
+                for regressor in regressors
+                if regressor.__name__ in self.model_config["regressor"]
+            ],
+        )
         self.best_model: str = None
-
 
     def __str__(self):
         return f"Model name: {self.model_name}"
 
-
     def train(self) -> None:
         """Train the model on the provided data"""
-        self.models, _ = self.predictor.fit(self.x_train, self.x_test, self.y_train, self.y_test)
+        self.models, _ = self.predictor.fit(
+            self.x_train, self.x_test, self.y_train, self.y_test
+        )
         self.best_model = self.models["RMSE"].idxmin()
         self._is_trained = True
-
 
     def predict(self, inputs: pd.DataFrame) -> np.ndarray:
         """Predict labels for the given data.

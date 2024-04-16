@@ -32,18 +32,28 @@ def run_batch_predictions(
     x_test = x_test.drop(columns=[data_schema.id])
 
     for column in data_schema.categorical_features:
-            x_test[column] = x_test[column].astype(str)
+        x_test[column] = x_test[column].astype(str)
 
     x_test = run_pipeline(x_test, data_schema, training=False)
 
     model = Regressor.load(predictor_dir)
     logger.info("Making predictions...")
     predictions_df = predict_with_model(model, x_test)
-    predictions_df = pd.DataFrame({data_schema.id: ids, model_config["prediction_field_name"]: predictions_df})
+    predictions_df = pd.DataFrame(
+        {data_schema.id: ids, model_config["prediction_field_name"]: predictions_df}
+    )
 
     logger.info("Saving predictions...")
     save_dataframe_as_csv(dataframe=predictions_df, file_path=predictions_file_path)
     logger.info("Batch predictions completed successfully")
+
+    parameters = model.predictor.models[model.best_model].get_params()
+    parameters = {
+        key: value for key, value in parameters.items() if key.startswith("regressor__")
+    }
+    logger.info(f"Used model: {model.best_model}")
+
+    logger.info(f"Model parameters: {parameters}")
 
 
 if __name__ == "__main__":
