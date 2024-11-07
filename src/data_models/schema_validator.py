@@ -2,7 +2,7 @@ from collections import Counter
 from enum import Enum
 from typing import List, Optional
 
-from pydantic import BaseModel, ValidationError, validator
+from pydantic import BaseModel, ValidationError, validator, field_validator
 
 
 class ID(BaseModel):
@@ -43,12 +43,12 @@ class Feature(BaseModel):
     description: str
     dataType: DataType
     nullable: bool
-    example: Optional[float]
-    categories: Optional[List[str]]
+    example: Optional[float] = None
+    categories: Optional[List[str]] = None
 
-    @validator("example", always=True, allow_reuse=True)
+    @field_validator("example")
     def example_is_present_with_data_type_is_numeric(cls, v, values):
-        data_type = values.get("dataType")
+        data_type = values.data.get("dataType")
         if data_type == "NUMERIC" and v is None:
             raise ValueError(
                 f"`example` must be present and a float or an integer "
@@ -56,9 +56,9 @@ class Feature(BaseModel):
             )
         return v
 
-    @validator("categories", always=True, allow_reuse=True)
+    @field_validator("categories")
     def categories_are_present_with_data_type_is_categorical(cls, v, values):
-        data_type = values.get("dataType")
+        data_type = values.data.get("dataType")
         if data_type == "CATEGORICAL" and v is None:
             raise ValueError(
                 "`categories` must be present when dataType is CATEGORICAL. "
@@ -66,9 +66,9 @@ class Feature(BaseModel):
             )
         return v
 
-    @validator("categories", always=True, allow_reuse=True)
+    @field_validator("categories")
     def categories_are_non_empty_strings(cls, v, values):
-        categories = values.get("categories")
+        categories = values.data.get("categories")
         if categories is not None:
             if len(categories) == 0:
                 raise ValueError(
@@ -98,19 +98,19 @@ class SchemaModel(BaseModel):
     target: Target
     features: List[Feature]
 
-    @validator("modelCategory", allow_reuse=True)
+    @field_validator("modelCategory")
     def valid_problem_category(cls, v):
         if v != "regression":
             raise ValueError(f"modelCategory must be 'regression'. Given {v}")
         return v
 
-    @validator("schemaVersion", allow_reuse=True)
+    @field_validator("schemaVersion")
     def valid_version(cls, v):
         if v != 1.0:
             raise ValueError(f"schemaVersion must be set to 1.0. Given {v}")
         return v
 
-    @validator("features", allow_reuse=True)
+    @field_validator("features")
     def at_least_one_predictor_field(cls, v):
         if len(v) < 1:
             raise ValueError(
@@ -118,7 +118,7 @@ class SchemaModel(BaseModel):
             )
         return v
 
-    @validator("features", allow_reuse=True)
+    @field_validator("features")
     def unique_feature_names(cls, v):
         """
         Check that the feature names are unique.
@@ -150,7 +150,7 @@ def validate_schema_dict(schema_dict: dict) -> dict:
         dict: validated schema as a python dictionary
     """
     try:
-        schema_dict = SchemaModel.parse_obj(schema_dict).dict()
+        schema_dict = SchemaModel.model_validate(schema_dict).model_dump()
         return schema_dict
     except ValidationError as exc:
         raise ValueError(f"Invalid schema: {exc}") from exc
